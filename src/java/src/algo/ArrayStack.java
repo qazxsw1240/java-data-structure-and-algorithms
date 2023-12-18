@@ -5,41 +5,41 @@ import java.util.NoSuchElementException;
 public class ArrayStack<E> implements Stack<E> {
     private static final int DEFAULT_CAPACITY = 8;
 
-    private final transient List<E> list;
+    private final transient Vector<E> vector;
 
     public ArrayStack() {
-        this.list = new ArrayList<>(DEFAULT_CAPACITY);
+        this.vector = new ArrayVector<>(DEFAULT_CAPACITY);
     }
 
     @Override
     public boolean isEmpty() {
-        return this.list.isEmpty();
+        return this.vector.isEmpty();
     }
 
     @Override
     public int size() {
-        return this.list.size();
+        return this.vector.size();
     }
 
     @Override
     public void push(E e) {
-        this.list.addLast(e);
+        this.vector.addLast(e);
     }
 
     @Override
     public E pop() {
-        if (this.list.isEmpty()) {
+        if (this.vector.isEmpty()) {
             throw new NoSuchElementException();
         }
-        return this.list.removeLast();
+        return this.vector.removeLast();
     }
 
     @Override
     public E peek() {
-        if (this.list.isEmpty()) {
+        if (this.vector.isEmpty()) {
             throw new NoSuchElementException();
         }
-        int top = this.list.size() - 1;
-        return this.list.get(top);
+        int top = this.vector.size() - 1;
+        return this.vector.get(top);
     }
 }
