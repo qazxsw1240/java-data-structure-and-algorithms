@@ -52,7 +52,7 @@ public class ArrayQueue<E> implements Queue<E> {
     @Override
     public void enqueue(E e) {
         // increase capacity
-        if (this.size == capacity) {
+        if (this.size == this.capacity) {
             int newCapacity = this.capacity * 2;
             // overflow check
             if (newCapacity < this.capacity) {
