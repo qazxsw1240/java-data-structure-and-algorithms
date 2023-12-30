@@ -65,7 +65,7 @@ public class DoublyLinkedList<E> implements List<E> {
             Node<E> node = node(index);
             linkBefore(node, newNode);
         }
-        this.size += 1;
+        this.size++;
     }
 
     @Override
@@ -89,7 +89,7 @@ public class DoublyLinkedList<E> implements List<E> {
         obsolete.item = null; // faster GC
         obsolete.previous = null;
         obsolete.next = null;
-        this.size -= 1;
+        this.size--;
         return item;
     }
 
@@ -127,12 +127,12 @@ public class DoublyLinkedList<E> implements List<E> {
         Node<E> n;
         if (index > half) {
             n = this.last;
-            for (int i = this.size - 1; i > index; i -= 1) {
+            for (int i = this.size - 1; i > index; i--) {
                 n = n.previous;
             }
         } else {
             n = this.first;
-            for (int i = 0; i < index; i += 1) {
+            for (int i = 0; i < index; i++) {
                 n = n.next;
             }
         }

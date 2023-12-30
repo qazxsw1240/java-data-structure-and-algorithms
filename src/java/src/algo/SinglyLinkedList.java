@@ -11,6 +11,33 @@ public class SinglyLinkedList<E> implements List<E> {
     }
 
     @Override
+    public boolean isEmpty() {
+        return this.size == 0;
+    }
+
+    @Override
+    public int size() {
+        return this.size;
+    }
+
+    @Override
+    public void addLast(E e) {
+        if (this.size == 0) {
+            addFirst(e);
+            return;
+        }
+        Node<E> node = node(this.size - 1); // last node
+        node.next = new Node<>(e, null);
+        this.size++;
+    }
+
+    @Override
+    public void addFirst(E e) {
+        this.head = new Node<>(e, this.head);
+        this.size++;
+    }
+
+    @Override
     public void add(int index, E e) {
         if (index < 0 || index > this.size) {
             throw new IndexOutOfBoundsException(index);
@@ -26,38 +53,11 @@ public class SinglyLinkedList<E> implements List<E> {
         Node<E> node = node(index - 1);
         Node<E> next = node.next;
         node.next = new Node<>(e, next);
-        this.size += 1;
+        this.size++;
     }
 
     @Override
-    public void addFirst(E e) {
-        this.head = new Node<>(e, this.head);
-        this.size += 1;
-    }
-
-    @Override
-    public void addLast(E e) {
-        if (this.size == 0) {
-            addFirst(e);
-            return;
-        }
-        Node<E> node = node(this.size - 1); // last node
-        node.next = new Node<>(e, null);
-        this.size += 1;
-    }
-
-    @Override
-    public E get(int index) {
-        return node(index).item;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return this.size == 0;
-    }
-
-    @Override
-    public E remove(int index) {
+    public E removeLast() {
         return null;
     }
 
@@ -67,18 +67,18 @@ public class SinglyLinkedList<E> implements List<E> {
     }
 
     @Override
-    public E removeLast() {
+    public E remove(int index) {
         return null;
+    }
+
+    @Override
+    public E get(int index) {
+        return node(index).item;
     }
 
     @Override
     public void set(int index, E e) {
         node(index).item = e;
-    }
-
-    @Override
-    public int size() {
-        return this.size;
     }
 
     private Node<E> linkAfter(Node<E> node, Node<E> newNode) {
@@ -102,7 +102,7 @@ public class SinglyLinkedList<E> implements List<E> {
                 break;
             }
             node = node.next;
-            i += 1;
+            i++;
         }
         return node;
     }

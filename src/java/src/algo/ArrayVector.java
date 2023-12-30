@@ -53,11 +53,11 @@ public class ArrayVector<E> implements Vector<E> {
             }
             replace(newCapacity);
         }
-        for (int i = this.size; i > index; i -= 1) {
+        for (int i = this.size; i > index; i--) {
             this.es[i] = this.es[i - 1];
         }
         this.es[index] = e;
-        this.size += 1;
+        this.size++;
     }
 
     @Override
@@ -78,10 +78,10 @@ public class ArrayVector<E> implements Vector<E> {
         @SuppressWarnings("unchecked")
         E ret = (E) this.es[index];
         int sizeM1 = this.size - 1;
-        for (int i = index; i < sizeM1; i += 1) {
+        for (int i = index; i < sizeM1; i++) {
             this.es[i] = this.es[i + 1];
         }
-        this.size -= 1;
+        this.size--;
         // decrease capacity;
         if ((this.size << 2) <= this.capacity) {
             int newCapacity = Math.max(this.capacity / 2, DECREASE_BOUND);

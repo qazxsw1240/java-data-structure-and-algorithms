@@ -64,7 +64,7 @@ public class ArrayQueue<E> implements Queue<E> {
             replace(newCapacity);
         }
         this.es[this.tail] = e;
-        this.size += 1;
+        this.size++;
         this.tail = (this.tail + 1) % this.capacity;
     }
 
@@ -76,7 +76,7 @@ public class ArrayQueue<E> implements Queue<E> {
         @SuppressWarnings("unchecked")
         E ret = (E) this.es[this.head];
         this.es[this.head] = null; // faster GC
-        this.size -= 1;
+        this.size--;
         this.head = (this.head + 1) % this.capacity;
         if ((this.size << 2) <= this.capacity) {
             int newCapacity = Math.max(this.capacity / 2, DECREASE_BOUND);
@@ -101,7 +101,7 @@ public class ArrayQueue<E> implements Queue<E> {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("[");
-        for (int i = 0; i < this.size;) {
+        for (int i = 0; i < this.size; ) {
             int index = (this.head + i) % this.capacity;
             builder.append(this.es[index]);
             if (++i != this.size) {
