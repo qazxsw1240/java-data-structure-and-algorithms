@@ -4,13 +4,13 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 
 public class ArrayQueue<E> implements Queue<E> {
-    private static final int DECREASE_BOUND = 16;
+    protected static final int DECREASE_BOUND = 16;
 
-    private transient Object[] es;
-    private transient int capacity;
-    private transient int size;
-    private transient int head;
-    private transient int tail;
+    protected Object[] es;
+    protected int capacity;
+    protected int size;
+    protected int head;
+    protected int tail;
 
     public ArrayQueue(int capacity) {
         if (capacity < 0) {
@@ -53,19 +53,11 @@ public class ArrayQueue<E> implements Queue<E> {
     public void enqueue(E e) {
         // increase capacity
         if (this.size == this.capacity) {
-            int newCapacity = this.capacity * 2;
-            // overflow check
-            if (newCapacity < this.capacity) {
-                newCapacity = Integer.MAX_VALUE;
-            }
-            if (newCapacity == this.capacity) {
-                throw new RuntimeException("Queue is full.");
-            }
-            replace(newCapacity);
+            increase();
         }
         this.es[this.tail] = e;
         this.size++;
-        this.tail = (this.tail + 1) % this.capacity;
+        this.tail = next(this.tail);
     }
 
     @Override
@@ -77,13 +69,9 @@ public class ArrayQueue<E> implements Queue<E> {
         E ret = (E) this.es[this.head];
         this.es[this.head] = null; // faster GC
         this.size--;
-        this.head = (this.head + 1) % this.capacity;
+        this.head = next(this.head);
         if ((this.size << 2) <= this.capacity) {
-            int newCapacity = Math.max(this.capacity / 2, DECREASE_BOUND);
-            if (newCapacity >= this.capacity) {
-                return ret;
-            }
-            replace(this.capacity);
+            decrease();
         }
         return ret;
     }
@@ -102,7 +90,7 @@ public class ArrayQueue<E> implements Queue<E> {
         StringBuilder builder = new StringBuilder();
         builder.append("[");
         for (int i = 0; i < this.size; ) {
-            int index = (this.head + i) % this.capacity;
+            int index = next(this.head, i);
             builder.append(this.es[index]);
             if (++i != this.size) {
                 builder.append(", ");
@@ -112,7 +100,35 @@ public class ArrayQueue<E> implements Queue<E> {
         return builder.toString();
     }
 
-    private void replace(int newCapacity) {
+    protected int next(int index) {
+        return next(index, 1);
+    }
+
+    protected int next(int index, int offset) {
+        return (index + offset) % this.capacity;
+    }
+
+    protected void increase() {
+        int newCapacity = this.capacity * 2;
+        // overflow check
+        if (newCapacity < this.capacity) {
+            newCapacity = Integer.MAX_VALUE;
+        }
+        if (newCapacity == this.capacity) {
+            throw new RuntimeException("Queue is full.");
+        }
+        replace(newCapacity);
+    }
+
+    protected void decrease() {
+        int newCapacity = Math.max(this.capacity / 2, DECREASE_BOUND);
+        if (newCapacity >= this.capacity) {
+            return;
+        }
+        replace(this.capacity);
+    }
+
+    protected void replace(int newCapacity) {
         int previousCapacity = this.es.length;
         Object[] newEs = new Object[newCapacity];
         for (int i = 0; i < this.size; i++) {

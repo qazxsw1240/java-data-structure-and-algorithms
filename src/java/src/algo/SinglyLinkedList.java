@@ -2,8 +2,8 @@ package src.algo;
 
 @SuppressWarnings("unused")
 public class SinglyLinkedList<E> implements List<E> {
-    private transient int size;
-    private transient Node<E> head;
+    private int size;
+    private Node<E> head;
 
     public SinglyLinkedList() {
         this.size = 0;
@@ -108,8 +108,8 @@ public class SinglyLinkedList<E> implements List<E> {
     }
 
     private static class Node<E> {
-        transient E item;
-        transient Node<E> next;
+        E item;
+        Node<E> next;
 
         Node(E item, Node<E> next) {
             this.item = item;

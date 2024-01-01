@@ -5,7 +5,7 @@ import java.util.NoSuchElementException;
 public class ArrayStack<E> implements Stack<E> {
     private static final int DEFAULT_CAPACITY = 8;
 
-    private final transient Vector<E> vector;
+    private final Vector<E> vector;
 
     public ArrayStack() {
         this.vector = new ArrayVector<>(DEFAULT_CAPACITY);

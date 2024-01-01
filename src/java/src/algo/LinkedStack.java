@@ -3,7 +3,7 @@ package src.algo;
 import java.util.NoSuchElementException;
 
 public class LinkedStack<E> implements Stack<E> {
-    private final transient DoublyLinkedList<E> list;
+    private final DoublyLinkedList<E> list;
 
     public LinkedStack() {
         this.list = new DoublyLinkedList<>();

@@ -3,9 +3,9 @@ package src.algo;
 import java.util.Random;
 
 public class DoublyLinkedList<E> implements List<E> {
-    private transient int size;
-    private transient Node<E> first;
-    private transient Node<E> last;
+    private int size;
+    private Node<E> first;
+    private Node<E> last;
 
     public DoublyLinkedList() {
         this.size = 0;
@@ -184,9 +184,9 @@ public class DoublyLinkedList<E> implements List<E> {
     }
 
     private static class Node<E> {
-        transient E item;
-        transient Node<E> previous;
-        transient Node<E> next;
+        E item;
+        Node<E> previous;
+        Node<E> next;
 
         Node(E item, Node<E> previous, Node<E> next) {
             this.item = item;

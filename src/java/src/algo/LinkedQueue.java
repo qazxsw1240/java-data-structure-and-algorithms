@@ -4,7 +4,7 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 
 public class LinkedQueue<E> implements Queue<E> {
-    private final transient DoublyLinkedList<E> list;
+    protected final DoublyLinkedList<E> list;
 
     public LinkedQueue() {
         this.list = new DoublyLinkedList<>();

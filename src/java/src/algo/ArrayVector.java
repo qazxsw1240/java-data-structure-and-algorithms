@@ -3,9 +3,9 @@ package src.algo;
 public class ArrayVector<E> implements Vector<E> {
     private static final int DECREASE_BOUND = 16;
 
-    private transient Object[] es;
-    private transient int capacity;
-    private transient int size;
+    private Object[] es;
+    private int capacity;
+    private int size;
 
     public ArrayVector(int capacity) {
         if (capacity < 0) {
