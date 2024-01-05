@@ -25,6 +25,7 @@ public class ArrayDeque<E> extends ArrayQueue<E> implements Deque<E> {
         int last = before(this.tail);
         @SuppressWarnings("unchecked")
         E ret = (E) this.es[last];
+        this.es[last] = null; // faster GC
         this.tail = before(last);
         this.size--;
         if ((this.size << 2) <= this.capacity) {
