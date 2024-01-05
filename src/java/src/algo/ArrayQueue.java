@@ -129,10 +129,9 @@ public class ArrayQueue<E> implements Queue<E> {
     }
 
     protected void replace(int newCapacity) {
-        int previousCapacity = this.es.length;
         Object[] newEs = new Object[newCapacity];
         for (int i = 0; i < this.size; i++) {
-            int index = (this.head + i) % previousCapacity;
+            int index = next(this.head, i);
             newEs[i] = this.es[index];
             this.es[index] = null; // faster GC
         }
