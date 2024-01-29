@@ -20,7 +20,6 @@ public class PriorityQueue<E> implements Queue<E> {
         Random random = new Random(0L);
         for (int i = 0; i < 20; i++) {
             priorityQueue.enqueue(random.nextInt(30));
-            System.out.println("top is " + priorityQueue.peek());
         }
         System.out.println("----------------");
         while (!priorityQueue.isEmpty()) {
