@@ -5,10 +5,10 @@ import java.util.Comparator;
 import java.util.Random;
 
 public class BinarySearchTreeSet<E> implements Set<E> {
-    private final Comparator<? super E> comparator;
+    protected final Comparator<? super E> comparator;
 
-    private Node<E> root;
-    private int size;
+    protected Node<E> root;
+    protected int size;
 
     public BinarySearchTreeSet(Comparator<? super E> comparator) {
         this.comparator = comparator;
@@ -84,21 +84,6 @@ public class BinarySearchTreeSet<E> implements Set<E> {
     @Override
     public boolean contains(E e) {
         return node(this.root, e) != null;
-    }
-
-    @Override
-    public Set<E> union(Set<E> s) {
-        return null;
-    }
-
-    @Override
-    public Set<E> intersection(Set<E> s) {
-        return null;
-    }
-
-    @Override
-    public Set<E> difference(Set<E> s) {
-        return null;
     }
 
     @Override

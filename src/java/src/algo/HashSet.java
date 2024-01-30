@@ -103,21 +103,6 @@ public class HashSet<E> implements Set<E> {
     }
 
     @Override
-    public Set<E> union(Set<E> s) {
-        return null;
-    }
-
-    @Override
-    public Set<E> intersection(Set<E> s) {
-        return null;
-    }
-
-    @Override
-    public Set<E> difference(Set<E> s) {
-        return null;
-    }
-
-    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("[");
