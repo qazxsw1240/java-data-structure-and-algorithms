@@ -5,10 +5,10 @@ import java.util.Comparator;
 import java.util.Random;
 
 public class BinarySearchTreeSet<E> implements Set<E> {
-    protected final Comparator<? super E> comparator;
+    private final Comparator<? super E> comparator;
 
-    protected Node<E> root;
-    protected int size;
+    private Node<E> root;
+    private int size;
 
     public BinarySearchTreeSet(Comparator<? super E> comparator) {
         this.comparator = comparator;
@@ -23,31 +23,13 @@ public class BinarySearchTreeSet<E> implements Set<E> {
             int value = random.nextInt(30);
             set.add(value);
             System.out.println(String.format("Added %d: ", value));
-            // System.out.println(set);
             set.debug(System.out);
         }
-        // set.add(8);
-        // set.add(4);
-        // set.add(12);
-        // set.add(2);
-        // set.add(6);
-        // set.add(10);
-        // set.add(14);
-        // set.add(1);
-        // set.add(3);
-        // set.add(5);
-        // set.add(7);
-        // set.add(9);
-        // set.add(11);
-        // set.add(13);
-        // set.add(15);
         while (!set.isEmpty()) {
             int value = random.nextInt(30);
             if (set.remove(value)) {
                 System.out.print("removed " + value + ": ");
-                System.out.println(set);
-                // System.out.println(set);
-                // set.debug(System.out);
+                set.debug(System.out);
             }
         }
     }
@@ -118,7 +100,7 @@ public class BinarySearchTreeSet<E> implements Set<E> {
         debug(printStream, this.root, 0);
     }
 
-    protected void debug(PrintStream printStream, Node<E> root, int level) {
+    private void debug(PrintStream printStream, Node<E> root, int level) {
         if (root == null) {
             return;
         }
@@ -130,7 +112,7 @@ public class BinarySearchTreeSet<E> implements Set<E> {
         debug(printStream, root.left, level + 1);
     }
 
-    protected Node<E> leftmost(Node<E> node) {
+    private Node<E> leftmost(Node<E> node) {
         if (node == null) {
             return null;
         }
@@ -144,21 +126,7 @@ public class BinarySearchTreeSet<E> implements Set<E> {
         return node;
     }
 
-    protected Node<E> rightmost(Node<E> node) {
-        if (node == null) {
-            return null;
-        }
-        while (true) {
-            Node<E> right = node.right;
-            if (right == null) {
-                break;
-            }
-            node = right;
-        }
-        return node;
-    }
-
-    protected Node<E> node(Node<E> root, E item) {
+    private Node<E> node(Node<E> root, E item) {
         while (root != null) {
             int comparison = this.comparator.compare(item, root.item);
             if (comparison == 0) {
@@ -169,7 +137,7 @@ public class BinarySearchTreeSet<E> implements Set<E> {
         return root;
     }
 
-    protected Node<E> add(Node<E> root, E item) {
+    private Node<E> add(Node<E> root, E item) {
         if (root == null) {
             return new Node<>(item, null, null, null);
         }
@@ -198,14 +166,40 @@ public class BinarySearchTreeSet<E> implements Set<E> {
         return root;
     }
 
-    protected Node<E> unlink(Node<E> node) {
+    private Node<E> unlink(Node<E> node) {
         if (node == null) {
             return null;
         }
+        Node<E> parent = node.parent;
         Node<E> left = node.left;
         Node<E> right = node.right;
+        if (left == null && right == null) {
+            if (parent == null) {
+                this.root = null;
+            } else {
+                if (parent.left == node) {
+                    parent.left = null;
+                } else {
+                    parent.right = null;
+                }
+            }
+            // faster GC
+            node.parent = null;
+            node.left = null;
+            node.right = null;
+            return node;
+        }
         if (left == null) {
-            node = shiftNode(node, right);
+            right.parent = parent;
+            if (parent == null) {
+                this.root = right;
+            } else {
+                if (parent.left == node) {
+                    parent.left = right;
+                } else {
+                    parent.right = right;
+                }
+            }
             // faster GC
             node.parent = null;
             node.left = null;
@@ -213,47 +207,31 @@ public class BinarySearchTreeSet<E> implements Set<E> {
             return node;
         }
         if (right == null) {
-            node = shiftNode(node, left);
+            left.parent = parent;
+            if (parent == null) {
+                this.root = left;
+            } else {
+                if (parent.left == node) {
+                    parent.left = left;
+                } else {
+                    parent.right = left;
+                }
+            }
             // faster GC
             node.parent = null;
             node.left = null;
             node.right = null;
             return node;
         }
-        Node<E> predecessor = leftmost(right);
-        if (predecessor.parent != node) {
-            // if the predecessor node is not the child node of the node
-            shiftNode(predecessor, predecessor.right);
-            predecessor.right = right;
-            right.parent = predecessor;
-        }
-        shiftNode(node, predecessor);
-        predecessor.left = left;
-        left.parent = predecessor;
-        // faster GC
-        node.parent = null;
-        node.left = null;
-        node.right = null;
-        return node;
+        Node<E> successor = leftmost(right);
+        // swaps the values with each other
+        E temp = node.item;
+        node.item = successor.item;
+        successor.item = temp;
+        return unlink(successor);
     }
 
-    protected Node<E> shiftNode(Node<E> node, Node<E> predecessor) {
-        assert node != null;
-        Node<E> parent = node.parent;
-        if (parent == null) { // if the node is the root node
-            this.root = predecessor;
-        } else if (parent.left == node) {
-            parent.left = predecessor;
-        } else {
-            parent.right = predecessor;
-        }
-        if (predecessor != null) {
-            predecessor.parent = parent;
-        }
-        return node;
-    }
-
-    protected static class Node<E> {
+    private static class Node<E> {
         E item;
         Node<E> parent;
         Node<E> left;
