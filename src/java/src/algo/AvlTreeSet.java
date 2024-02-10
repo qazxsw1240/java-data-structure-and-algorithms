@@ -96,11 +96,11 @@ public class AvlTreeSet<E> implements Set<E> {
         return node == null ? 0 : node.height;
     }
 
-    private void siftUpHeight(Node<E> node) {
-        assert node.left == null && node.right == null;
+    private void updateHeight(Node<E> node) {
         if (node == null) {
             return;
         }
+        assert node.left == null && node.right == null;
         Node<E> parent = node.parent;
         while (parent != null) {
             Node<E> sibling = parent.left == node ? parent.right : parent.left;
@@ -108,13 +108,6 @@ public class AvlTreeSet<E> implements Set<E> {
             node = parent;
             parent = parent.parent;
         }
-    }
-
-    private int siftDownHeight(Node<E> root) {
-        if (root == null) {
-            return 0;
-        }
-        return root.height = Math.max(siftDownHeight(root.left), siftDownHeight(root.right)) + 1;
     }
 
     private Node<E> parentOf(Node<E> node) {
@@ -136,6 +129,7 @@ public class AvlTreeSet<E> implements Set<E> {
     }
 
     private Node<E> takeBalanceAfterInsertion(Node<E> node) {
+        // node is a leaf node
         Node<E> parent = parentOf(node);
         while (parent != null) {
             Node<E> grandparent = parentOf(parent);
@@ -148,7 +142,7 @@ public class AvlTreeSet<E> implements Set<E> {
                 continue;
             }
             if (grandparent.left == parent) {
-                if (parent.right == node) {// LR rotation to LL rotation
+                if (parent.right == node) { // LR rotation to LL rotation
                     rotateLeft(parent);
                 }
                 rotateRight(grandparent);
@@ -158,13 +152,14 @@ public class AvlTreeSet<E> implements Set<E> {
                 }
                 rotateLeft(grandparent);
             }
-            siftUpHeight(node);
+            updateHeight(node);
             parent = parentOf(node);
         }
         return this.root;
     }
 
     private Node<E> takeBalanceAfterDeletion(Node<E> node) {
+        // node is a grandparent node
         while (node != null) {
             Node<E> parent = parentOf(node);
             int balanceFactor = heightOf(node.left) - heightOf(node.right);
@@ -187,7 +182,7 @@ public class AvlTreeSet<E> implements Set<E> {
                 }
                 rotateLeft(node);
             }
-            siftUpHeight(node);
+            updateHeight(node);
             node = parent;
         }
         return this.root;
@@ -286,7 +281,7 @@ public class AvlTreeSet<E> implements Set<E> {
                 node = node.right;
             }
         }
-        siftUpHeight(node);
+        updateHeight(node);
         return takeBalanceAfterInsertion(node);
     }
 
@@ -311,7 +306,7 @@ public class AvlTreeSet<E> implements Set<E> {
             node.parent = null;
             node.left = null;
             node.right = null;
-            siftUpHeight(parent);
+            updateHeight(parent);
             takeBalanceAfterDeletion(parent);
             return node;
         }
@@ -330,7 +325,7 @@ public class AvlTreeSet<E> implements Set<E> {
             node.parent = null;
             node.left = null;
             node.right = null;
-            siftUpHeight(right);
+            updateHeight(right);
             takeBalanceAfterDeletion(right);
             return node;
         }
@@ -349,7 +344,7 @@ public class AvlTreeSet<E> implements Set<E> {
             node.parent = null;
             node.left = null;
             node.right = null;
-            siftUpHeight(left);
+            updateHeight(left);
             takeBalanceAfterDeletion(left);
             return node;
         }
