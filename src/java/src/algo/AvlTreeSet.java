@@ -262,31 +262,17 @@ public class AvlTreeSet<E> implements Set<E> {
         }
         Node<E> parent = node.parent;
         Node<E> child = node.left != null ? node.left : node.right;
-        if (child == null) {
-            if (parent == null) {
-                this.root = null;
-            } else {
-                if (parent.left == node) {
-                    parent.left = null;
-                } else {
-                    parent.right = null;
-                }
-            }
-        } else {
+        if (child != null) {
             child.parent = parent;
-            if (parent == null) {
-                this.root = child;
+        }
+        if (parent == null) {
+            this.root = child;
+        } else {
+            if (parent.left == node) {
+                parent.left = child;
             } else {
-                if (parent.left == node) {
-                    parent.left = child;
-                } else {
-                    parent.right = child;
-                }
+                parent.right = child;
             }
-            // faster GC
-            node.parent = null;
-            node.left = null;
-            node.right = null;
         }
         // faster GC
         node.parent = null;
