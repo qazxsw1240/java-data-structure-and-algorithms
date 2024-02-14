@@ -52,7 +52,9 @@ public class AvlTreeSet<E> implements Set<E> {
     public void add(E e) {
         Node<E> node = add(this.root, e);
         if (node != null) {
-            this.root = node;
+            if (node.parent == null) {
+                this.root = node;
+            }
             this.size++;
         }
     }
@@ -100,14 +102,14 @@ public class AvlTreeSet<E> implements Set<E> {
         if (node == null) {
             return;
         }
-        assert node.left == null && node.right == null;
-        Node<E> parent = node.parent;
-        while (parent != null) {
-            Node<E> sibling = parent.left == node ? parent.right : parent.left;
-            parent.height = Math.max(heightOf(sibling), heightOf(node)) + 1;
-            node = parent;
-            parent = parent.parent;
+        node.height = Math.max(heightOf(node.left), heightOf(node.right)) + 1;
+    }
+
+    private int balanceFactor(Node<E> node) {
+        if (node == null) {
+            return 0;
         }
+        return heightOf(node.left) - heightOf(node.right);
     }
 
     private Node<E> parentOf(Node<E> node) {
@@ -128,64 +130,33 @@ public class AvlTreeSet<E> implements Set<E> {
         return node;
     }
 
-    private Node<E> takeBalanceAfterInsertion(Node<E> node) {
-        // node is a leaf node
-        Node<E> parent = parentOf(node);
-        while (parent != null) {
-            Node<E> grandparent = parentOf(parent);
-            if (grandparent == null) {
-                break;
-            }
-            int balanceFactor = heightOf(grandparent.left) - heightOf(grandparent.right);
-            if (Math.abs(balanceFactor) < 2) {
-                parent = grandparent;
-                continue;
-            }
-            if (grandparent.left == parent) {
-                if (parent.right == node) { // LR rotation to LL rotation
-                    rotateLeft(parent);
-                }
-                rotateRight(grandparent);
-            } else {
-                if (parent.left == node) { // RL rotation to RR rotation
-                    rotateRight(parent);
-                }
-                rotateLeft(grandparent);
-            }
-            updateHeight(node);
-            parent = parentOf(node);
+    private void takeBalance(Node<E> node) {
+        if (node == null) {
+            return;
         }
-        return this.root;
-    }
-
-    private Node<E> takeBalanceAfterDeletion(Node<E> node) {
-        // node is a grandparent node
         while (node != null) {
             Node<E> parent = parentOf(node);
-            int balanceFactor = heightOf(node.left) - heightOf(node.right);
+            updateHeight(node);
+            int balanceFactor = balanceFactor(node);
             if (Math.abs(balanceFactor) < 2) {
                 node = parent;
                 continue;
             }
-            if (balanceFactor == 2) {
-                Node<E> child = node.left;
-                int childBalanceFactor = heightOf(child.left) - heightOf(child.right);
+            if (balanceFactor >= 2) {
+                int childBalanceFactor = balanceFactor(node.left);
                 if (childBalanceFactor < 0) { // LR rotation to LL rotation
-                    rotateLeft(child);
+                    rotateLeft(node.left);
                 }
                 rotateRight(node);
             } else {
-                Node<E> child = node.right;
-                int childBalanceFactor = heightOf(child.left) - heightOf(child.right);
+                int childBalanceFactor = balanceFactor(node.right);
                 if (childBalanceFactor > 0) { // RL rotation to RR rotation
-                    rotateRight(child);
+                    rotateRight(node.right);
                 }
                 rotateLeft(node);
             }
-            updateHeight(node);
             node = parent;
         }
-        return this.root;
     }
 
     private void rotateLeft(Node<E> node) {
@@ -209,8 +180,8 @@ public class AvlTreeSet<E> implements Set<E> {
             }
         }
         // recalculate height
-        node.height = Math.max(heightOf(node.left), heightOf(node.right)) + 1;
-        right.height = Math.max(heightOf(node), heightOf(right.right)) + 1;
+        updateHeight(node);
+        updateHeight(right);
     }
 
     private void rotateRight(Node<E> node) {
@@ -234,8 +205,8 @@ public class AvlTreeSet<E> implements Set<E> {
             }
         }
         // recalculate height
-        node.height = Math.max(heightOf(node.left), heightOf(node.right)) + 1;
-        left.height = Math.max(heightOf(node), heightOf(left.left)) + 1;
+        updateHeight(node);
+        updateHeight(left);
     }
 
     private Node<E> node(Node<E> root, E e) {
@@ -281,18 +252,17 @@ public class AvlTreeSet<E> implements Set<E> {
                 node = node.right;
             }
         }
-        updateHeight(node);
-        return takeBalanceAfterInsertion(node);
+        takeBalance(node);
+        return root;
     }
 
-    private Node<E> unlink(Node<E> node) {
+    private Node<E> unlinkLeafOrSingleChildNode(Node<E> node) {
         if (node == null) {
             return null;
         }
         Node<E> parent = node.parent;
-        Node<E> left = node.left;
-        Node<E> right = node.right;
-        if (left == null && right == null) {
+        Node<E> child = node.left != null ? node.left : node.right;
+        if (child == null) {
             if (parent == null) {
                 this.root = null;
             } else {
@@ -302,58 +272,45 @@ public class AvlTreeSet<E> implements Set<E> {
                     parent.right = null;
                 }
             }
-            // faster GC
-            node.parent = null;
-            node.left = null;
-            node.right = null;
-            updateHeight(parent);
-            takeBalanceAfterDeletion(parent);
-            return node;
-        }
-        if (left == null) {
-            right.parent = parent;
+        } else {
+            child.parent = parent;
             if (parent == null) {
-                this.root = right;
+                this.root = child;
             } else {
                 if (parent.left == node) {
-                    parent.left = right;
+                    parent.left = child;
                 } else {
-                    parent.right = right;
+                    parent.right = child;
                 }
             }
             // faster GC
             node.parent = null;
             node.left = null;
             node.right = null;
-            updateHeight(right);
-            takeBalanceAfterDeletion(right);
-            return node;
         }
-        if (right == null) {
-            left.parent = parent;
-            if (parent == null) {
-                this.root = left;
-            } else {
-                if (parent.left == node) {
-                    parent.left = left;
-                } else {
-                    parent.right = left;
-                }
-            }
-            // faster GC
-            node.parent = null;
-            node.left = null;
-            node.right = null;
-            updateHeight(left);
-            takeBalanceAfterDeletion(left);
-            return node;
+        // faster GC
+        node.parent = null;
+        node.left = null;
+        node.right = null;
+        takeBalance(child);
+        return node;
+    }
+
+    private Node<E> unlink(Node<E> node) {
+        if (node == null) {
+            return null;
+        }
+        Node<E> left = node.left;
+        Node<E> right = node.right;
+        if (left == null || right == null) {
+            return unlinkLeafOrSingleChildNode(node);
         }
         Node<E> successor = leftmost(right);
         // swaps the values with each other
         E temp = node.item;
         node.item = successor.item;
         successor.item = temp;
-        return unlink(successor);
+        return unlinkLeafOrSingleChildNode(successor);
     }
 
     private static class Node<E> {
