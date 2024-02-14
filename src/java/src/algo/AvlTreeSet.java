@@ -278,7 +278,7 @@ public class AvlTreeSet<E> implements Set<E> {
         node.parent = null;
         node.left = null;
         node.right = null;
-        takeBalance(child);
+        takeBalance(child != null ? child : parent);
         return node;
     }
 
