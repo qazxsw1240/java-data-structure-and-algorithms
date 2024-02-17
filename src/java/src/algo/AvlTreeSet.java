@@ -1,6 +1,7 @@
 package src.algo;
 
 import java.io.PrintStream;
+import java.text.MessageFormat;
 import java.util.Comparator;
 import java.util.Random;
 
@@ -75,19 +76,37 @@ public class AvlTreeSet<E> implements Set<E> {
     }
 
     public void debug(PrintStream printStream) {
-        debug(printStream, this.root, 0);
-    }
-
-    private void debug(PrintStream printStream, Node<E> root, int level) {
-        if (root == null) {
-            return;
+        int level = 0;
+        Node<E> node = this.root;
+        // move to rightmost node
+        while (node != null && node.right != null) {
+            node = node.right;
+            level++;
         }
-        debug(printStream, root.right, level + 1);
-        printStream.print("     ".repeat(level));
-        printStream.print("|");
-        printStream.print(root.item);
-        printStream.println("|<");
-        debug(printStream, root.left, level + 1);
+        // starts with the rightmost node
+        while (node != null) {
+            printStream.print("    ".repeat(level));
+            printStream.println(MessageFormat.format("|{0}|<", node.item));
+            if (node.left != null) {
+                node = node.left;
+                level++;
+                // move to rightmost node
+                while (node != null && node.right != null) {
+                    node = node.right;
+                    level++;
+                }
+            } else {
+                Node<E> parent = node.parent;
+                Node<E> current = node;
+                while (parent != null && parent.left == current) {
+                    current = parent;
+                    parent = current.parent;
+                    level--;
+                }
+                node = parent;
+                level--;
+            }
+        }
     }
 
     private int compare(E e1, E e2) {
@@ -312,11 +331,6 @@ public class AvlTreeSet<E> implements Set<E> {
             this.left = left;
             this.right = right;
             this.height = height;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("Node{ value: %s }", this.item);
         }
     }
 }
