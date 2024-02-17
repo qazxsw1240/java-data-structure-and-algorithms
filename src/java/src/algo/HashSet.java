@@ -20,8 +20,7 @@ public class HashSet<E> implements Set<E> {
     }
 
     private static int hash(Object o) {
-        int h;
-        return (o == null) ? 0 : (h = o.hashCode()) ^ (h >>> 16);
+        return (o == null) ? 0 : (o.hashCode());
     }
 
     public static void main(String... args) {
@@ -40,7 +39,7 @@ public class HashSet<E> implements Set<E> {
             "lime"
         };
         Random random = new Random(0L);
-        HashSet<String> set = new HashSet<>(3);
+        HashSet<String> set = new HashSet<>(2);
         for (int i = 0, bound = data.length * 2; i < bound; i++) {
             String element = data[random.nextInt(data.length)];
             System.out.printf("added \"%s\": ", element);
@@ -178,18 +177,18 @@ public class HashSet<E> implements Set<E> {
             return;
         }
         for (int i = newCapacity; i < this.capacity; i++) {
-            Node<E> bucket = this.buckets[i];
-            if (bucket == null) {
+            Node<E> node = this.buckets[i];
+            if (node == null) {
                 continue;
             }
-            while (bucket != null) {
-                int entry = entry(bucket.item) % newCapacity;
-                Node<E> next = bucket.next;
+            while (node != null) {
+                int entry = entry(node.item) % newCapacity;
+                Node<E> next = node.next;
                 if (i != entry) {
-                    unlink(i, bucket);
-                    rehashInsert(entry, bucket);
+                    unlink(i, node);
+                    rehashInsert(entry, node);
                 }
-                bucket = next;
+                node = next;
             }
         }
         replace(newCapacity);
