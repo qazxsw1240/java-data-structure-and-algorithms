@@ -1,6 +1,7 @@
 package src.algo;
 
 import java.io.PrintStream;
+import java.text.MessageFormat;
 import java.util.Comparator;
 import java.util.Random;
 
@@ -19,21 +20,25 @@ public class RedBlackTreeSet<E> implements Set<E> {
     public static void main(String[] args) {
         Random random = new Random(0L);
         RedBlackTreeSet<Integer> set = new RedBlackTreeSet<>(Comparator.naturalOrder());
-        for (int i = 0; i < 100; i++) {
-            // int value = random.nextInt(30);
-            int value = i;
+        for (int i = 0; i < 30; i++) {
+            int value = random.nextInt(30);
+            int previousSize = set.size();
             set.add(value);
-            System.out.printf("Added %d: %n", value);
-            set.debug(System.out);
-            System.out.println();
+            int nextSize = set.size();
+            if (previousSize != nextSize) {
+                System.out.printf("Added %d: %n", value);
+                set.debug(System.out);
+                System.out.println();
+            }
         }
-        // while (!set.isEmpty()) {
-        //     int value = random.nextInt(33);
-        //     if (set.remove(value)) {
-        //         System.out.print("removed " + value + ": ");
-        //         System.out.println(set);
-        //     }
-        // }
+        while (!set.isEmpty()) {
+            int value = random.nextInt(30);
+            if (set.remove(value)) {
+                System.out.println(MessageFormat.format("removed {0}: {1}", value, set));
+                set.debug(System.out);
+                System.out.println();
+            }
+        }
     }
 
     private static <E> Color colorOf(Node<E> node) {
@@ -84,44 +89,93 @@ public class RedBlackTreeSet<E> implements Set<E> {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("[");
-        if (this.root != null) {
-            Stack<Node<E>> stack = new LinkedStack<>();
-            Node<E> current = this.root;
-            while (current != null) {
-                stack.push(current);
-                current = current.left;
+        for (Node<E> node = leftmost(this.root); node != null;) {
+            builder.append(node.item);
+            node = successor(node);
+            if (node == null) {
+                break;
             }
-            while (!stack.isEmpty()) {
-                Node<E> node = stack.pop();
-                builder.append(node.item);
-                Node<E> next = node.right;
-                while (next != null) {
-                    stack.push(next);
-                    next = next.left;
-                }
-                if (!stack.isEmpty()) {
-                    builder.append(", ");
-                }
-            }
+            builder.append(", ");
         }
         builder.append("]");
         return builder.toString();
     }
 
     public void debug(PrintStream printStream) {
-        debug(printStream, this.root, 0);
-    }
-
-    private void debug(PrintStream printStream, Node<E> root, int level) {
-        if (root == null) {
+        if (this.root == null) {
             return;
         }
-        debug(printStream, root.right, level + 1);
-        printStream.print("     ".repeat(level));
-        printStream.print("|");
-        printStream.printf("%s, %s", root.item, root.color == Color.RED ? "R" : "B");
-        printStream.println("|<");
-        debug(printStream, root.left, level + 1);
+        int level = 0;
+        Node<E> node = this.root;
+        // move to rightmost node
+        while (node != null && node.right != null) {
+            node = node.right;
+            level++;
+        }
+        // starts with the rightmost node
+        while (node != null) {
+            printStream.print("    ".repeat(level));
+            printStream.println(MessageFormat.format("|{0}|<", node.item));
+            if (node.left != null) {
+                node = node.left;
+                level++;
+                // move to rightmost node
+                while (node != null && node.right != null) {
+                    node = node.right;
+                    level++;
+                }
+            } else {
+                Node<E> parent = node.parent;
+                Node<E> current = node;
+                while (parent != null && parent.left == current) {
+                    current = parent;
+                    parent = current.parent;
+                    level--;
+                }
+                node = parent;
+                level--;
+            }
+        }
+    }
+
+    private static <E> Node<E> predecessor(Node<E> node) {
+        if (node == null) {
+            return null;
+        }
+        if (node.left != null) {
+            Node<E> next = node.left;
+            while (next.right != null) {
+                next = next.right;
+            }
+            return next;
+        }
+        Node<E> parent = node.parent;
+        Node<E> current = node;
+        while (parent != null && parent.left == current) {
+            current = parent;
+            parent = current.parent;
+        }
+        return parent;
+    }
+
+    private static <E> Node<E> successor(Node<E> node) {
+        if (node == null) {
+            return null;
+        }
+        if (node.right != null) {
+            Node<E> next = node.right;
+            while (next.left != null) {
+                next = next.left;
+            }
+            return next;
+        }
+        Node<E> parent = node.parent;
+        Node<E> current = node;
+        while (parent != null && parent.right == current) {
+            current = parent;
+            parent = parent.parent;
+        }
+        return parent;
     }
 
     private Node<E> leftmost(Node<E> node) {
@@ -246,7 +300,8 @@ public class RedBlackTreeSet<E> implements Set<E> {
                 if (colorOf(uncle) == Color.RED) { // if the uncle node is red
                     // recolor
                     parent.color = Color.BLACK;
-                    if (uncle != null) uncle.color = Color.BLACK;
+                    if (uncle != null)
+                        uncle.color = Color.BLACK;
                     grandparent.color = Color.RED;
                     // switch to the grandparent node to check double-red
                     node = grandparent;
@@ -269,7 +324,8 @@ public class RedBlackTreeSet<E> implements Set<E> {
                 if (colorOf(uncle) == Color.RED) {
                     // recolor
                     parent.color = Color.BLACK;
-                    if (uncle != null) uncle.color = Color.BLACK;
+                    if (uncle != null)
+                        uncle.color = Color.BLACK;
                     grandparent.color = Color.RED;
                     // switch to the grandparent node to check double-red
                     node = grandparent;
@@ -281,7 +337,6 @@ public class RedBlackTreeSet<E> implements Set<E> {
                         // after the rotation, the node and its parent will swap places
                         rotateRight(node);
                     }
-
                     // recolor
                     parent.color = Color.BLACK;
                     grandparent.color = Color.RED;
