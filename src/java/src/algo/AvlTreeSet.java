@@ -311,10 +311,8 @@ public class AvlTreeSet<E> implements Set<E> {
             return unlinkLeafOrSingleChildNode(node);
         }
         Node<E> successor = leftmost(right);
-        // swaps the values with each other
-        E temp = node.item;
+        // copies the node's value to the successor
         node.item = successor.item;
-        successor.item = temp;
         return unlinkLeafOrSingleChildNode(successor);
     }
 
