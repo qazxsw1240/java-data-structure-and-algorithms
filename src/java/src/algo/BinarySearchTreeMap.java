@@ -128,20 +128,6 @@ public class BinarySearchTreeMap<K, V> implements Map<K, V> {
         return node;
     }
 
-    private Node<K, V> rightmost(Node<K, V> node) {
-        if (node == null) {
-            return null;
-        }
-        while (true) {
-            Node<K, V> right = node.right;
-            if (right == null) {
-                break;
-            }
-            node = right;
-        }
-        return node;
-    }
-
     private Node<K, V> node(Node<K, V> root, K key) {
         while (root != null) {
             int comparison = this.comparator.compare(key, root.key);
