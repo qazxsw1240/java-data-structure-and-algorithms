@@ -4,6 +4,7 @@ import java.io.PrintStream;
 import java.text.MessageFormat;
 import java.util.Comparator;
 import java.util.Random;
+import java.util.TreeMap;
 
 public class RedBlackTreeSet<E> implements Set<E> {
     private final Comparator<? super E> comparator;
@@ -11,15 +12,21 @@ public class RedBlackTreeSet<E> implements Set<E> {
     private Node<E> root;
     private int size;
 
+    @SuppressWarnings("unchecked")
+    public RedBlackTreeSet() {
+        this((Comparator<? super E>) Comparator.naturalOrder());
+    }
+
     public RedBlackTreeSet(Comparator<? super E> comparator) {
         this.comparator = comparator;
         this.root = null;
         this.size = 0;
+        new TreeMap<String, Object>();
     }
 
     public static void main(String[] args) {
         Random random = new Random(0L);
-        RedBlackTreeSet<Integer> set = new RedBlackTreeSet<>(Comparator.naturalOrder());
+        RedBlackTreeSet<Integer> set = new RedBlackTreeSet<>();
         for (int i = 0; i < 30; i++) {
             int value = random.nextInt(30);
             int previousSize = set.size();
@@ -45,6 +52,62 @@ public class RedBlackTreeSet<E> implements Set<E> {
         return node == null ? Color.BLACK : node.color;
     }
 
+    private static <E> void setColorOf(Node<E> node, Color color) {
+        if (node != null) {
+            node.color = color;
+        }
+    }
+
+    private static <E> Node<E> parentOf(Node<E> node) {
+        return node == null ? null : node.parent;
+    }
+
+    private static <E> void setParentOf(Node<E> node, Node<E> parent) {
+        if (node != null) {
+            node.parent = parent;
+        }
+    }
+
+    private static <E> Node<E> leftOf(Node<E> node) {
+        return node == null ? null : node.left;
+    }
+
+    private static <E> void setLeftOf(Node<E> node, Node<E> left) {
+        if (node != null) {
+            node.left = left;
+        }
+    }
+
+    private static <E> Node<E> rightOf(Node<E> node) {
+        return node == null ? null : node.right;
+    }
+
+    private static <E> void setRightOf(Node<E> node, Node<E> right) {
+        if (node != null) {
+            node.right = right;
+        }
+    }
+
+    private static <E> Node<E> successor(Node<E> node) {
+        if (node == null) {
+            return null;
+        }
+        if (rightOf(node) != null) {
+            Node<E> next = rightOf(node);
+            while (leftOf(next) != null) {
+                next = leftOf(next);
+            }
+            return next;
+        }
+        Node<E> parent = parentOf(node);
+        Node<E> current = node;
+        while (parent != null && rightOf(parent) == current) {
+            current = parent;
+            parent = parentOf(current);
+        }
+        return parent;
+    }
+
     @Override
     public boolean isEmpty() {
         return this.size == 0;
@@ -59,10 +122,10 @@ public class RedBlackTreeSet<E> implements Set<E> {
     public void add(E e) {
         Node<E> node = add(this.root, e);
         if (node != null) {
-            if (node.parent == null) {
+            if (parentOf(node) == null) {
                 this.root = node;
             } else {
-                if (node.parent.color == Color.RED) {
+                if (colorOf(parentOf(node)) == Color.RED) {
                     recolorAfterInsertion(node);
                 }
             }
@@ -89,7 +152,7 @@ public class RedBlackTreeSet<E> implements Set<E> {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("[");
-        for (Node<E> node = leftmost(this.root); node != null;) {
+        for (Node<E> node = leftmost(this.root); node != null; ) {
             builder.append(node.item);
             node = successor(node);
             if (node == null) {
@@ -108,28 +171,28 @@ public class RedBlackTreeSet<E> implements Set<E> {
         int level = 0;
         Node<E> node = this.root;
         // move to rightmost node
-        while (node != null && node.right != null) {
-            node = node.right;
+        while (rightOf(node) != null) {
+            node = rightOf(node);
             level++;
         }
         // starts with the rightmost node
         while (node != null) {
             printStream.print("    ".repeat(level));
             printStream.println(MessageFormat.format("|{0}|<", node.item));
-            if (node.left != null) {
-                node = node.left;
+            if (leftOf(node) != null) {
+                node = leftOf(node);
                 level++;
                 // move to rightmost node
-                while (node != null && node.right != null) {
-                    node = node.right;
+                while (rightOf(node) != null) {
+                    node = rightOf(node);
                     level++;
                 }
             } else {
-                Node<E> parent = node.parent;
+                Node<E> parent = parentOf(node);
                 Node<E> current = node;
-                while (parent != null && parent.left == current) {
+                while (leftOf(parent) == current) {
                     current = parent;
-                    parent = current.parent;
+                    parent = parentOf(current);
                     level--;
                 }
                 node = parent;
@@ -138,67 +201,27 @@ public class RedBlackTreeSet<E> implements Set<E> {
         }
     }
 
-    private static <E> Node<E> predecessor(Node<E> node) {
-        if (node == null) {
-            return null;
-        }
-        if (node.left != null) {
-            Node<E> next = node.left;
-            while (next.right != null) {
-                next = next.right;
-            }
-            return next;
-        }
-        Node<E> parent = node.parent;
-        Node<E> current = node;
-        while (parent != null && parent.left == current) {
-            current = parent;
-            parent = current.parent;
-        }
-        return parent;
-    }
-
-    private static <E> Node<E> successor(Node<E> node) {
-        if (node == null) {
-            return null;
-        }
-        if (node.right != null) {
-            Node<E> next = node.right;
-            while (next.left != null) {
-                next = next.left;
-            }
-            return next;
-        }
-        Node<E> parent = node.parent;
-        Node<E> current = node;
-        while (parent != null && parent.right == current) {
-            current = parent;
-            parent = parent.parent;
-        }
-        return parent;
+    private int compare(E x, E y) {
+        return this.comparator.compare(x, y);
     }
 
     private Node<E> leftmost(Node<E> node) {
         if (node == null) {
             return null;
         }
-        while (true) {
-            Node<E> left = node.left;
-            if (left == null) {
-                break;
-            }
-            node = left;
+        while (leftOf(node) != null) {
+            node = leftOf(node);
         }
         return node;
     }
 
     private Node<E> node(Node<E> root, E item) {
         while (root != null) {
-            int comparison = this.comparator.compare(item, root.item);
+            int comparison = compare(item, root.item);
             if (comparison == 0) {
                 break;
             }
-            root = comparison < 0 ? root.left : root.right;
+            root = comparison < 0 ? leftOf(root) : rightOf(root);
         }
         return root;
     }
@@ -209,28 +232,59 @@ public class RedBlackTreeSet<E> implements Set<E> {
         }
         Node<E> node = root;
         while (true) {
-            int comparison = this.comparator.compare(item, node.item);
+            int comparison = compare(item, node.item);
             if (comparison == 0) {
                 return null;
             }
             if (comparison < 0) {
-                Node<E> left = node.left;
+                Node<E> left = leftOf(node);
                 if (left == null) {
-                    node.left = new Node<>(item, node, null, null, Color.RED);
-                    node = node.left;
+                    setLeftOf(node, new Node<>(item, node, null, null, Color.RED));
+                    node = leftOf(node);
                     break;
                 }
-                node = node.left;
+                node = leftOf(node);
             } else {
-                Node<E> right = node.right;
+                Node<E> right = rightOf(node);
                 if (right == null) {
-                    node.right = new Node<>(item, node, null, null, Color.RED);
-                    node = node.right;
+                    setRightOf(node, new Node<>(item, node, null, null, Color.RED));
+                    node = rightOf(node);
                     break;
                 }
-                node = node.right;
+                node = rightOf(node);
             }
         }
+        return node;
+    }
+
+    private Node<E> unlinkLeafOrSingleChildNode(Node<E> node) {
+        assert node != null;
+        Node<E> parent = parentOf(node);
+        Node<E> child = leftOf(node) != null ? leftOf(node) : rightOf(node);
+        if (child != null) {
+            setParentOf(child, parent);
+        } else {
+            if (colorOf(node) == Color.BLACK) {
+                recolorAfterDeletion(node);
+            }
+        }
+        parent = parentOf(node); // check reassigned parent
+        if (parent == null) {
+            this.root = child;
+        } else {
+            if (leftOf(parent) == node) {
+                setLeftOf(parent, child);
+            } else {
+                setRightOf(parent, child);
+            }
+        }
+        if (colorOf(this.root) == Color.RED) { // check integrity
+            setColorOf(this.root, Color.BLACK);
+        }
+        // faster GC
+        setParentOf(node, null);
+        setLeftOf(node, null);
+        setRightOf(node, null);
         return node;
     }
 
@@ -238,158 +292,157 @@ public class RedBlackTreeSet<E> implements Set<E> {
         if (node == null) {
             return null;
         }
-        Node<E> left = node.left;
-        Node<E> right = node.right;
-        if (left == null) {
-            node = shiftNode(node, right);
-            // faster GC
-            node.parent = null;
-            node.left = null;
-            node.right = null;
-            return node;
+        Node<E> left = leftOf(node);
+        Node<E> right = rightOf(node);
+        if (left == null || right == null) {
+            return unlinkLeafOrSingleChildNode(node);
         }
-        if (right == null) {
-            node = shiftNode(node, left);
-            // faster GC
-            node.parent = null;
-            node.left = null;
-            node.right = null;
-            return node;
-        }
-        Node<E> predecessor = leftmost(right);
-        if (predecessor.parent != node) {
-            // if the predecessor node is not the child node of the node
-            shiftNode(predecessor, predecessor.right);
-            predecessor.right = right;
-            right.parent = predecessor;
-        }
-        shiftNode(node, predecessor);
-        predecessor.left = left;
-        left.parent = predecessor;
-        // faster GC
-        node.parent = null;
-        node.left = null;
-        node.right = null;
-        return node;
-    }
-
-    private Node<E> shiftNode(Node<E> node, Node<E> predecessor) {
-        assert node != null;
-        Node<E> parent = node.parent;
-        if (parent == null) { // if the node is the root node
-            this.root = predecessor;
-        } else if (parent.left == node) {
-            parent.left = predecessor;
-        } else {
-            parent.right = predecessor;
-        }
-        if (predecessor != null) {
-            predecessor.parent = parent;
-        }
-        return node;
+        Node<E> successor = successor(node);
+        node.item = successor.item;
+        return unlinkLeafOrSingleChildNode(successor);
     }
 
     private void recolorAfterInsertion(Node<E> node) {
         assert node != null;
-        Node<E> parent;
-        while (colorOf((parent = node.parent)) == Color.RED) {
-            Node<E> grandparent = parent.parent;
-            Node<E> uncle;
-            if (parent == grandparent.left) {
-                uncle = grandparent.right;
+        while (colorOf((parentOf(node))) == Color.RED) {
+            Node<E> parent = parentOf(node);
+            Node<E> grandparent = parentOf(parent);
+            if (parent == leftOf(grandparent)) {
+                Node<E> uncle = rightOf(grandparent);
                 if (colorOf(uncle) == Color.RED) { // if the uncle node is red
                     // recolor
-                    parent.color = Color.BLACK;
-                    if (uncle != null)
-                        uncle.color = Color.BLACK;
-                    grandparent.color = Color.RED;
+                    setColorOf(parent, Color.BLACK);
+                    setColorOf(uncle, Color.BLACK);
+                    setColorOf(grandparent, Color.RED);
                     // switch to the grandparent node to check double-red
                     node = grandparent;
                 } else { // if the uncle node is black
-                    if (node == parent.right) {
-                        Node<E> temp = node;
+                    if (node == rightOf(parent)) {
+                        rotateLeft(parent);
+                        // reassign
                         node = parent;
-                        parent = temp;
-                        // after the rotation, the node and its parent will swap places
-                        rotateLeft(node);
+                        parent = parentOf(node);
                     }
                     // recolor
-                    parent.color = Color.BLACK;
-                    grandparent.color = Color.RED;
+                    setColorOf(parent, Color.BLACK);
+                    setColorOf(parent, Color.BLACK);
+                    setColorOf(grandparent, Color.RED);
                     rotateRight(grandparent);
                     break;
                 }
-            } else {
-                uncle = grandparent.left;
+            } else { // symmetric operation
+                Node<E> uncle = leftOf(grandparent);
                 if (colorOf(uncle) == Color.RED) {
-                    // recolor
-                    parent.color = Color.BLACK;
-                    if (uncle != null)
-                        uncle.color = Color.BLACK;
-                    grandparent.color = Color.RED;
-                    // switch to the grandparent node to check double-red
+                    setColorOf(parent, Color.BLACK);
+                    setColorOf(uncle, Color.BLACK);
+                    setColorOf(grandparent, Color.RED);
                     node = grandparent;
-                } else { // if the uncle node is black
-                    if (node == parent.left) {
-                        Node<E> temp = node;
+                } else {
+                    if (node == leftOf(parent)) {
+                        rotateRight(parent);
                         node = parent;
-                        parent = temp;
-                        // after the rotation, the node and its parent will swap places
-                        rotateRight(node);
+                        parent = parentOf(node);
                     }
-                    // recolor
-                    parent.color = Color.BLACK;
-                    grandparent.color = Color.RED;
+                    setColorOf(parent, Color.BLACK);
+                    setColorOf(grandparent, Color.RED);
                     rotateLeft(grandparent);
                     break;
                 }
             }
         }
-        if (this.root.color != Color.BLACK) { // check integrity
-            this.root.color = Color.BLACK;
+        setColorOf(this.root, Color.BLACK); // check integrity
+    }
+
+    private void recolorAfterDeletion(Node<E> node) {
+        while (parentOf(node) != null && colorOf(node) == Color.BLACK) {
+            Node<E> parent = parentOf(node);
+            if (node == leftOf(parent)) {
+                Node<E> sibling = rightOf(parent);
+                if (colorOf(sibling) == Color.RED) {
+                    setColorOf(sibling, Color.BLACK);
+                    setColorOf(parent, Color.BLACK);
+                    rotateLeft(parent);
+                    sibling = rightOf(parent);
+                }
+                if (colorOf(leftOf(sibling)) == Color.BLACK && colorOf(rightOf(sibling)) == Color.BLACK) {
+                    setColorOf(sibling, Color.RED);
+                    node = parent;
+                } else {
+                    if (colorOf(rightOf(sibling)) == Color.BLACK) {
+                        setColorOf(leftOf(sibling), Color.BLACK);
+                        setColorOf(sibling, Color.RED);
+                        rotateRight(sibling);
+                        sibling = rightOf(parent);
+                    }
+                    setColorOf(sibling, colorOf(parent));
+                    setColorOf(parent, Color.BLACK);
+                    setColorOf(rightOf(sibling), Color.BLACK);
+                    rotateLeft(parent);
+                    break;
+                }
+            } else { // symmetric operation
+                Node<E> sibling = leftOf(parent);
+                if (colorOf(sibling) == Color.RED) {
+                    setColorOf(sibling, Color.BLACK);
+                    setColorOf(parent, Color.BLACK);
+                    rotateRight(parent);
+                    sibling = leftOf(parent);
+                }
+                if (colorOf(rightOf(sibling)) == Color.BLACK && colorOf(leftOf(sibling)) == Color.BLACK) {
+                    setColorOf(sibling, Color.RED);
+                    node = parent;
+                } else {
+                    if (colorOf(leftOf(sibling)) == Color.BLACK) {
+                        setColorOf(rightOf(sibling), Color.BLACK);
+                        setColorOf(sibling, Color.RED);
+                        rotateLeft(sibling);
+                        sibling = leftOf(parent);
+                    }
+                    setColorOf(sibling, colorOf(parent));
+                    setColorOf(parent, Color.BLACK);
+                    setColorOf(leftOf(sibling), Color.BLACK);
+                    rotateLeft(parent);
+                    break;
+                }
+            }
         }
+        setColorOf(this.root, Color.BLACK); // check integrity
     }
 
     private void rotateLeft(Node<E> node) {
-        assert node != null && node.right != null;
-        Node<E> parent = node.parent;
-        Node<E> right = node.right;
-        node.right = right.left;
-        if (node.right != null) {
-            node.right.parent = node;
-        }
-        node.parent = right;
-        right.left = node;
-        right.parent = parent;
+        Node<E> parent = parentOf(node);
+        Node<E> right = rightOf(node);
+        setRightOf(node, leftOf(right));
+        setParentOf(rightOf(node), node);
+        setParentOf(node, right);
+        setLeftOf(right, node);
+        setParentOf(right, parent);
         if (parent == null) {
             this.root = right;
         } else {
-            if (node == parent.left) {
-                parent.left = right;
+            if (node == leftOf(parent)) {
+                setLeftOf(parent, right);
             } else {
-                parent.right = right;
+                setRightOf(parent, right);
             }
         }
     }
 
     private void rotateRight(Node<E> node) {
-        assert node != null && node.left != null;
-        Node<E> parent = node.parent;
-        Node<E> left = node.left;
-        node.left = left.right;
-        if (node.left != null) {
-            node.left.parent = node;
-        }
-        node.parent = left;
-        left.right = node;
-        left.parent = parent;
+        Node<E> parent = parentOf(node);
+        Node<E> left = leftOf(node);
+        setLeftOf(node, rightOf(left));
+        setParentOf(leftOf(node), node);
+        setParentOf(node, left);
+        setRightOf(left, node);
+        setParentOf(left, parent);
         if (parent == null) {
             this.root = left;
         } else {
-            if (node == parent.left) {
-                parent.left = left;
+            if (node == leftOf(parent)) {
+                setLeftOf(parent, left);
             } else {
-                parent.right = left;
+                setRightOf(parent, left);
             }
         }
     }
