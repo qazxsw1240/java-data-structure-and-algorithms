@@ -1,6 +1,7 @@
 package src.algo;
 
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
@@ -63,6 +64,11 @@ public class PriorityQueue<E> implements Queue<E> {
             throw new NoSuchElementException();
         }
         return this.vector.get(0);
+    }
+
+    @Override
+    public Iterator<E> iterator() {
+        return this.vector.iterator();
     }
 
     private void siftUp(int size) {
