@@ -1,5 +1,6 @@
 package src.algo;
 
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class LinkedStack<E> implements Stack<E> {
@@ -44,5 +45,10 @@ public class LinkedStack<E> implements Stack<E> {
     @Override
     public String toString() {
         return this.list.toString();
+    }
+
+    @Override
+    public Iterator<E> iterator() {
+        return this.list.iterator();
     }
 }

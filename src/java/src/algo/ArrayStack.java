@@ -1,5 +1,6 @@
 package src.algo;
 
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class ArrayStack<E> implements Stack<E> {
@@ -41,5 +42,10 @@ public class ArrayStack<E> implements Stack<E> {
         }
         int top = this.vector.size() - 1;
         return this.vector.get(top);
+    }
+
+    @Override
+    public Iterator<E> iterator() {
+        return this.vector.iterator();
     }
 }
