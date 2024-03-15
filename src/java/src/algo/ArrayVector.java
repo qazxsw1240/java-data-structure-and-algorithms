@@ -1,5 +1,8 @@
 package src.algo;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 public class ArrayVector<E> implements Vector<E> {
     private static final int DECREASE_BOUND = 16;
 
@@ -105,6 +108,11 @@ public class ArrayVector<E> implements Vector<E> {
         this.es[index] = e;
     }
 
+    @Override
+    public Iterator<E> iterator() {
+        return new VectorIterator<>(this, 0);
+    }
+
     private void replace(int newCapacity) {
         Object[] newEs = new Object[newCapacity];
         for (int i = 0; i < this.size; i++) {
@@ -113,5 +121,30 @@ public class ArrayVector<E> implements Vector<E> {
         }
         this.capacity = newCapacity;
         this.es = newEs;
+    }
+
+    private static class VectorIterator<E> implements Iterator<E> {
+        final ArrayVector<E> vector;
+        int index;
+
+        VectorIterator(ArrayVector<E> vector, int index) {
+            this.vector = vector;
+            this.index = index;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return this.index != this.vector.size;
+        }
+
+        @Override
+        public E next() {
+            if (this.index == this.vector.size) {
+                throw new NoSuchElementException();
+            }
+            @SuppressWarnings("unchecked")
+            E item = (E) this.vector.es[this.index++];
+            return item;
+        }
     }
 }

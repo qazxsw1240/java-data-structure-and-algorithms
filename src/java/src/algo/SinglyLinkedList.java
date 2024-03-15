@@ -1,5 +1,8 @@
 package src.algo;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 @SuppressWarnings("unused")
 public class SinglyLinkedList<E> implements List<E> {
     private int size;
@@ -81,6 +84,11 @@ public class SinglyLinkedList<E> implements List<E> {
         node(index).item = e;
     }
 
+    @Override
+    public Iterator<E> iterator() {
+        return new LinkedListIterator<>(this.head);
+    }
+
     private Node<E> linkAfter(Node<E> node, Node<E> newNode) {
         if (node == null) {
             return newNode;
@@ -114,6 +122,30 @@ public class SinglyLinkedList<E> implements List<E> {
         Node(E item, Node<E> next) {
             this.item = item;
             this.next = next;
+        }
+    }
+
+    private static class LinkedListIterator<E> implements Iterator<E> {
+        Node<E> node;
+
+        LinkedListIterator(Node<E> node) {
+            this.node = node;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return this.node != null;
+        }
+
+        @Override
+        public E next() {
+            if (this.node == null) {
+                throw new NoSuchElementException();
+            }
+            Node<E> next = this.node.next;
+            E item = this.node.item;
+            this.node = next;
+            return item;
         }
     }
 }

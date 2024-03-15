@@ -1,6 +1,6 @@
 package src.algo;
 
-public interface Vector<E> extends DataStructure {
+public interface Vector<E> extends DataStructure, Iterable<E> {
     public abstract void addLast(E e);
 
     public abstract void addFirst(E e);

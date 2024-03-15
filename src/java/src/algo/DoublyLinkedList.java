@@ -1,5 +1,7 @@
 package src.algo;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Random;
 
 public class DoublyLinkedList<E> implements List<E> {
@@ -119,6 +121,11 @@ public class DoublyLinkedList<E> implements List<E> {
         return builder.toString();
     }
 
+    @Override
+    public Iterator<E> iterator() {
+        return new LinkedListIterator<>(this.first);
+    }
+
     private Node<E> node(int index) {
         if (index < 0 || index >= this.size) {
             throw new IndexOutOfBoundsException(index);
@@ -192,6 +199,30 @@ public class DoublyLinkedList<E> implements List<E> {
             this.item = item;
             this.previous = previous;
             this.next = next;
+        }
+    }
+
+    private static class LinkedListIterator<E> implements Iterator<E> {
+        Node<E> node;
+
+        LinkedListIterator(Node<E> node) {
+            this.node = node;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return this.node != null;
+        }
+
+        @Override
+        public E next() {
+            if (this.node == null) {
+                throw new NoSuchElementException();
+            }
+            Node<E> next = this.node.next;
+            E item = this.node.item;
+            this.node = next;
+            return item;
         }
     }
 }
