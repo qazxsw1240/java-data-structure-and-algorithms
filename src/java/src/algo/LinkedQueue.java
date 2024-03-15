@@ -1,5 +1,6 @@
 package src.algo;
 
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
@@ -60,5 +61,10 @@ public class LinkedQueue<E> implements Queue<E> {
     @Override
     public String toString() {
         return this.list.toString();
+    }
+
+    @Override
+    public Iterator<E> iterator() {
+        return this.list.iterator();
     }
 }

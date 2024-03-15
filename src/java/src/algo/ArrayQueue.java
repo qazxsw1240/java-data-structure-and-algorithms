@@ -1,5 +1,6 @@
 package src.algo;
 
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
@@ -86,6 +87,11 @@ public class ArrayQueue<E> implements Queue<E> {
     }
 
     @Override
+    public Iterator<E> iterator() {
+        return new ArrayQueueIterator<>(this, 0);
+    }
+
+    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("[");
@@ -139,5 +145,32 @@ public class ArrayQueue<E> implements Queue<E> {
         this.es = newEs;
         this.head = 0;
         this.tail = this.size;
+    }
+
+    protected static class ArrayQueueIterator<E> implements Iterator<E> {
+        final ArrayQueue<E> queue;
+        int index;
+
+        ArrayQueueIterator(ArrayQueue<E> queue, int index) {
+            this.queue = queue;
+            this.index = index;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return this.index != this.queue.size;
+        }
+
+        @Override
+        public E next() {
+            if (this.index == this.queue.size) {
+                throw new NoSuchElementException();
+            }
+            int index = this.queue.next(this.queue.head, this.index);
+            @SuppressWarnings("unchecked")
+            E item = (E) this.queue.es[index];
+            this.index = index + 1;
+            return item;
+        }
     }
 }
